@@ -11,8 +11,8 @@ const Routes: React.FC = () => (
 
   // 'exact' faz a validação para que seja chamada aquele exato caminho
   <Switch>
-    <Route path='/' exact component={ Dashboard } />
-    <Route path='/repository' component={ Repository } />
+    <Route path="/" exact component={Dashboard} />
+    <Route path="/repository" component={Repository} />
   </Switch>
 );
 
