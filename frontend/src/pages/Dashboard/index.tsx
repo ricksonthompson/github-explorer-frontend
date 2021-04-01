@@ -1,7 +1,7 @@
 import React, { useState, FormEvent } from 'react';
 import { FiChevronRight } from 'react-icons/fi';
 
-import { Title, Form, Repositories } from './styles';
+import { Title, Form, Repositories, Error } from './styles';
 import githubLogo from '../../assets/logo.svg';
 import api from '../../services/api';
 
@@ -18,8 +18,10 @@ interface Repository {
 
 // Declaração do componente em formato de função
 const Dashboard: React.FC = () => {
-  const [newRepo, setNewRepo] = useState('');
   // Estrutura: var onde vai ser armazenado / var que vai setar um novo valor / estado atual (iniciando vazio)
+  const [newRepo, setNewRepo] = useState('');
+  const [inputError, setInputError] = useState('');
+  // state para o error
   const [repositories, setRepositories] = useState<Repository[]>([]);
 
   async function handleAddRepository(
@@ -29,24 +31,38 @@ const Dashboard: React.FC = () => {
     e.preventDefault();
     // Vai previnir o comportamento padrão do form de querer recarregar após o envio
 
-    const response = await api.get<Repository>(`repos/${newRepo}`);
-    // get<> força a tipagem do return da requisição
+    // se o input for vazia, return o erro
+    if (!newRepo) {
+      setInputError('Digite o autor/nome do repositório');
+      return;
+    }
 
-    const repository = response.data;
+    try {
+      const response = await api.get<Repository>(`repos/${newRepo}`);
+      // get<> força a tipagem do return da requisição
 
-    setRepositories([...repositories, repository]);
-    // mantém os dados e adiciona um novo valor
-    setNewRepo('');
-    // mantém o input do form limpo após o envio
+      const repository = response.data;
+
+      setRepositories([...repositories, repository]);
+      // mantém os dados e adiciona um novo valor
+      setNewRepo('');
+      // mantém o input do form limpo após o envio
+      setInputError('');
+      // remove a msg de erro após a cond ser atentida
+    } catch (err) {
+      setInputError('Erro na busca por esse repositório');
+    }
   }
 
   return (
     // <> </> fragments são utlizados quando há mais de um elemento declarado
+    // {!!inputError} vai converter uma string em boolean.
+    // {inputError && <Error>{inputError}</Error>} cria um if simplificado. Onde só vai mostrar o elemento se houver o erro
     <>
       <img src={githubLogo} alt="GitHub Explorer" />
       <Title>Explore repositórios no GitHub</Title>
 
-      <Form onSubmit={handleAddRepository}>
+      <Form hasError={!!inputError} onSubmit={handleAddRepository}>
         <input
           value={newRepo}
           onChange={e => setNewRepo(e.target.value)}
@@ -55,6 +71,8 @@ const Dashboard: React.FC = () => {
         />
         <button type="submit">Pesquisar</button>
       </Form>
+
+      {inputError && <Error>{inputError}</Error>}
 
       <Repositories>
         {repositories.map(repository => (
