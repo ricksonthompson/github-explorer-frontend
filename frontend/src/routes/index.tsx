@@ -10,6 +10,7 @@ const Routes: React.FC = () => (
    */
 
   // 'exact' faz a validação para que seja chamada aquele exato caminho
+  // /:repository+ indica que tudo que vier após o : é param
   <Switch>
     <Route path="/" exact component={Dashboard} />
     <Route path="/repositories/:repository+" component={Repository} />
